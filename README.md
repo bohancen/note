@@ -1,2 +1,3 @@
 # note
-日常记录
+------
+> [js-xx](https://github.com/leizongmin/js-xss)
