@@ -1,5 +1,5 @@
 # note
 
-> [js-xx](https://github.com/leizongmin/js-xss)
-> [koa](https://github.com/koajs/koa)
+- [js-xx](https://github.com/leizongmin/js-xss)
+- [koa](https://github.com/koajs/koa)
 
