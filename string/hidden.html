@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>字符串截取</title>
+</head>
+<body>
+<script type="text/javascript">
+// 获取
+var str = `
+<div class="ql-hidden"><div class="ql-hidden-title"></div><div class="ql-hidden-box"><article>1</article><article>2</article></div></div>
+<div>div</div>
+<p>pppp</p>
+<div class="ql-hidden"><div class="ql-hidden-title"></div><div class="ql-hidden-box"><article>3</article><article>4</article></div></div>
+`
+var res = str.replace(/<div class=\"ql-hidden\"><div class=\"ql-hidden-title\"><\/div><div class=\"ql-hidden-box\">(.+)<\/div><\/div>/gi,function(){
+	console.log(arguments)
+	return arguments[1]
+})
+console.log(res)
+// 重组
+var str2 = `
+<article>1</article><article>2</article>
+<div>div</div>
+<p>pppp</p>
+<article>3</article><article>4</article>
+`
+var res2 = str2.replace(/<article>(.+)<\/article>/gi,function(){
+	console.log(arguments)
+	return `
+		<div class="ql-hidden">
+			<div class="ql-hidden-title"></div>
+			<div class="ql-hidden-box">
+				${arguments[0]}
+			</div>
+		</div>
+	`
+})
+console.log(res2)
+</script>
+</body>
+</html>
