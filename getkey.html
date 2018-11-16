@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>获取属性值</title>
+</head>
+<body>
+	<script type="text/javascript">
+		var obj = {
+			a:{
+				b:{
+					c:1
+				}
+			}
+		}
+		function get(obj,keys){
+			var keys = keys.split('.')
+			keys.forEach(function(key){
+				if(obj[key]){
+					obj = obj[key]
+				}else{
+					obj = undefined
+				}
+			})
+			return obj
+		}
+		console.log(get(obj,'a.b.d'))
+		console.log(obj)
+	</script>
+</body>
+</html>
