@@ -4,6 +4,9 @@ lrwxrwxrwx. 1 root root 27 Aug 25 09:21 node -> /root/node-v8.11.4/bin/node
 lrwxrwxrwx. 1 root root 26 Aug 25 09:21 npm -> /root/node-v8.11.4/bin/npm
 # nginx
 config /etc/nginx/conf.d
+/etc/nginx/conf.d
+nginx -t
+nginx -s reload
 # 防火墙 centos7
 sudo systemctl stop firewalld.service && sudo systemctl disable firewalld.service
 
