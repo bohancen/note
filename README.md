@@ -22,6 +22,7 @@ sudo systemctl stop firewalld.service && sudo systemctl disable firewalld.servic
 ## 更换vscode的默认终端
 
 "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\bash.exe"
+[参考地址](https://blog.csdn.net/technofiend/article/details/72771277)
 
 ## 设置环境变量的三种方法 ubantu in win10
 ### 1.1 临时设置
