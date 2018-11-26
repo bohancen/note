@@ -36,3 +36,29 @@ export PATH=/home/yan/share/usr/local/arm/3.4.1/bin:$PATH1
 $ vim /etc/profile1
 在里面加入：export PATH=/home/yan/share/usr/local/arm/3.4.1/bin:$PATH1
 使生效 source profile
+
+### vscode
+https://www.jianshu.com/p/8f18ecacc4b5
+1、安装插件：Path Intellisense
+2、配置：
+
+    "path-intellisense.mappings": {
+        "@": "${workspaceRoot}/src"
+    }
+3、在项目package.json所在同级目录下创建文件jsconfig.json：
+
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "commonjs",
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": "./",
+        "paths": {
+          "@/*": ["src/*"]
+        }
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
+
