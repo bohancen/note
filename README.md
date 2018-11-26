@@ -47,18 +47,18 @@ https://www.jianshu.com/p/8f18ecacc4b5
     }
 3、在项目package.json所在同级目录下创建文件jsconfig.json：
 
-{
-    "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": "./",
-        "paths": {
-          "@/*": ["src/*"]
-        }
-    },
-    "exclude": [
-        "node_modules"
-    ]
-}
+    {
+        "compilerOptions": {
+            "target": "ES6",
+            "module": "commonjs",
+            "allowSyntheticDefaultImports": true,
+            "baseUrl": "./",
+            "paths": {
+              "@/*": ["src/*"]
+            }
+        },
+        "exclude": [
+            "node_modules"
+        ]
+    }
 
