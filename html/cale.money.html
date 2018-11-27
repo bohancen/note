@@ -1,64 +1,712 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-	<title>calc</title>
-	<style type="text/css">
-		td{border: 1px solid #000}
-	</style>
-</head>
-<body>
-	实付总价格：<input id="count" type="text" name="">
-	<p>每份价格：<button id="add">+</button></p>
-	<ul id="list">
-	</ul>
-	<table id="table"></table>
-	<button id="calc">计算</button>
-	<script>
-		function $calc(total,every=[]){
-			let res = []
-			let count = every.reduce(function(pre,cur){return pre+cur},0)
-			every.forEach(function(num){
-				res.push(total*num/count)
-			})
-			return res
-		}
-		const create=()=>{
-			let ele = document.createElement('li')
-			ele.innerHTML = '<input type="text"> <button>-</button>'
-			let del = ele.getElementsByTagName('button')[0]
-			let input = ele.getElementsByTagName('input')[0]
-			del.onclick = ()=>{
-				list.removeChild(ele)
-			}
-			list.appendChild(ele)
-			input.focus()
-		}
-		add.onclick=()=>{
-			create()
-		}
-		calc.onclick=()=>{
-			let total = parseFloat(count.value)
-			let every = []
-			Array.from(list.getElementsByTagName('input')).forEach((el)=>{
-				if(el.value){
-					every.push(parseFloat(el.value))
-				}
-			})
-			console.log(every)
-			let res = $calc(total,every)
-			console.log(res)
-			
-			table.innerHTML = `
-			<tr>${every.map((val)=>{
-				return `<td>${val}</td>`
-			})}</tr>
-			<tr>${res.map((val)=>{
-				return `<td>${val}</td>`
-			})}</tr>
-			`
-		}
-	</script>
-</body>
-</html>
+Array.prototype.distinct = function(){
+  var arr = this,
+    result = [],
+    i,
+    j,
+    len = arr.length;
+  for(i = 0; i < len; i++){
+    for(j = i + 1; j < len; j++){
+    if(arr[i] === arr[j]){
+      j = ++i;
+    }
+    }
+    result.push(arr[i]);
+  }
+  return result;
+}
+var quill = new Quill('#editor', {
+  theme: 'snow'
+});
+const editorEle_contenteditable = document.querySelector('#editor >div')
+// 统一用这个函数向app发送消息
+function sendMessageToApp(param){
+  // console.log('统一用这个函数向app发送消息：',param)
+  try{
+    webkit.messageHandlers.BFJSObj.postMessage(param)
+  }catch(e){
+    // console.log(e)
+  }
+  try{
+    BFJSObj.postMessage(JSON.stringify(param))
+  }catch(e){
+    // console.log(e)
+  }
+}
+// 统计文字输入数量
+quill.on('text-change', function (delta, oldDelta, source) {
+  var txt = editor.innerText.replace(/[\n\r]/g,'').trim()
+  var calc = ['img','iframe'].reduce((count,ele)=>{
+    var el = editor.querySelectorAll(ele)
+    if(el.length>0){
+      if(ele == 'img'){
+        count += el.length * 5
+      }
+      if(ele == 'iframe'){
+        count += el.length * 5
+      }
+    }
+    return count
+  },0)
+  // console.log(calc)
+  var obj = {
+    key:'textchange',
+    len:txt.length + calc
+  }
+  sendMessageToApp(obj)
+});
+// 发送当前样式
+var editor_change_timer = null
+let editor_change_islock = false
+quill.on('editor-change', function () {
+  if(editor_change_islock){
+    return 
+  }
+  clearTimeout(editor_change_timer)
+  editor_change_timer = setTimeout(function(){
+    var obj={
+      key:'stylechange',
+      data:quill.getFormat()
+    }
+    console.log(obj)
+    sendMessageToApp(obj)
+  },300)
+});
+editorEle_contenteditable.onblur=()=>{
+  // console.log('onblur')
+  editor_change_islock = true
+}
+editorEle_contenteditable.onfocus=()=>{
+  // console.log('onfocus')
+  editor_change_islock = false
+}
+// 开始计数 移动计数框位置
+document.onclick=function(){
+  var obj = {
+    key:'focus'
+  }
+  sendMessageToApp(obj)
+}
+// replace 占位图
+window.replaceImg=function(obj){
+  var imgs = editor.getElementsByTagName('img')
+  for(var i=0;i<imgs.length;i++){
+    if(decodeURI(obj.holdurl) == decodeURI(imgs[i].src)){
+      // 上传失败了
+      if(obj.url == ''){
+        imgs[i].parentNode.removeChild(imgs[i])
+        continue
+      }
+      imgs[i].setAttribute('data-picurl',obj.url)
+      // imgs[i].setAttribute('src',obj.url)
+      imgs[i].className = ''
+    }
+  }
+}
 
+// 以下是暴露给app使用方法
+// 让编辑器获取焦点
+window.editorFocus=function(){
+  quill.focus()
+}
+// 发送前 替换本地图片 变成 src
+function replaceDataPicurlToSrc(HTML){
+  var div = document.createElement('div');
+  div.innerHTML = HTML
+  var imgs = div.getElementsByTagName('img')
+  for(var i=0;i<imgs.length;i++){
+    if(imgs[i].getAttribute('data-picurl')){
+      imgs[i].src = imgs[i].getAttribute('data-picurl')
+    }
+  }
+  return div.innerHTML
+}
+
+// 查找AT
+function findAT(HTML){
+  var div = document.createElement('div');
+  div.innerHTML = HTML
+  var el = div.querySelectorAll("a[at]")
+  var resArray = []
+  for(var i=0;i<el.length;i++){
+    var val = el[i].getAttribute('at')
+    if(val && val.trim()!= ''){
+      resArray.push(val.replace('@',''))
+    }
+  }
+  return resArray.distinct()
+  // return Array.from(new Set(resArray))
+}
+// 查找图片
+function findIMAGE(HTML){
+  var keyUrl = 'hdslb.com/bfs/'
+  var div = document.createElement('div');
+  div.innerHTML = HTML
+  var el = div.getElementsByTagName("img")
+  var resArray = []
+  for(var i=0;i<el.length;i++){
+    if(el[i].className != 'emoticons'){
+      if( el[i].src &&el[i].src.indexOf(keyUrl)>0 ){
+        resArray.push(el[i].src)
+      }
+    }
+  }
+  // console.log(resArray)
+  return resArray.distinct()
+  // return Array.from(new Set(resArray))
+}
+// 查找视频
+function findVIDEO(HTML){
+  var div = document.createElement('div');
+  div.innerHTML = HTML
+  var el = div.getElementsByTagName("iframe")
+  var resArray = []
+  for(var i=0;i<el.length;i++){
+    resArray.push({
+      'picurl':el[i].getAttribute('data-picurl'),
+      'src':el[i].getAttribute('src')
+    })
+  }
+  return resArray.distinct()
+  // return Array.from(new Set(resArray))
+}
+// // code-video 视频转成 iframe
+function txtToIframe(HTML){
+  var div = document.createElement('div');
+  div.innerHTML = HTML
+  var el = div.getElementsByTagName("code-video")
+  var findVIDEO = []
+  for(var i=0;i<el.length;i++){
+    let src = el[i].getAttribute('src')
+    if(src.substring(0,2) == '//'){
+      src = 'https:'+src
+    }
+    let picurl = el[i].getAttribute('data-picurl')
+    let iframe = document.createElement('iframe');
+    iframe.className='ql-video'
+    iframe.setAttribute('src',src)
+    iframe.setAttribute('data-picurl',picurl)
+    iframe.setAttribute('frameborder','0')
+    el[i].parentNode.insertBefore(iframe,el[i]);
+    findVIDEO.push(el[i])
+  }
+  for(var i=0;i<findVIDEO.length;i++){
+    findVIDEO[i].parentNode.removeChild(findVIDEO[i])
+  }
+  var atEl = div.getElementsByTagName("a")
+  for(var i=0;i<atEl.length;i++){
+    let attrAT = atEl[i].getAttribute('at')
+    if(attrAT){
+      atEl[i].href = `/user/${attrAT.replace('@','')}/news`
+      atEl[i].setAttribute('target','_self')
+    }
+  }
+  
+
+  return div.innerHTML
+}
+// img表情转为 文字表情
+function translateTxtImg(html){
+  var find = function(src){
+    src = decodeURI(src)
+    for(var i=0;i<smile.length;i++){
+      if(src.indexOf(smile[i].src)>-1 || src.indexOf(smile[i].file.replace('..',''))>-1){
+        return smile[i].txt
+      }
+    }
+    return false
+  }
+  var div = document.createElement('div');
+  div.innerHTML = html
+  var el = div.getElementsByTagName("img")
+  var findEmoticons = []
+  for(var i=0;i<el.length;i++){
+    if(el[i].className == 'emoticons'){
+      var txt = find(el[i].src)
+      if(txt){
+        var textnode=document.createTextNode(txt)
+        el[i].parentNode.insertBefore(textnode,el[i]);
+        findEmoticons.push(el[i])
+      }
+    }
+  }
+  for(var i=0;i<findEmoticons.length;i++){
+    findEmoticons[i].parentNode.removeChild(findEmoticons[i])
+  }
+  return div.innerHTML
+}
+// iframe 视频转成 code-video
+function iframeToTxt(HTML){
+  var div = document.createElement('div');
+  div.innerHTML = HTML
+  var el = div.getElementsByTagName("iframe")
+  var findIframe = []
+  for(var i=0;i<el.length;i++){
+    let src = el[i].getAttribute('src')
+    let picurl = el[i].getAttribute('data-picurl')
+    let videonode = document.createElement(`code-video`)
+    videonode.setAttribute('src',src)
+    videonode.setAttribute('data-picurl',picurl)
+    el[i].parentNode.insertBefore(videonode,el[i]);
+    findIframe.push(el[i])
+  }
+  for(var i=0;i<findIframe.length;i++){
+    findIframe[i].parentNode.removeChild(findIframe[i])
+  }
+  return div.innerHTML
+}
+
+function articleToHidden(html){
+  if(typeof html != 'string'){
+    return false
+  }
+  var startTag = '<article'
+  var endTag = '</article>'
+  var htmlLength = html.length
+  if(html.indexOf(startTag)<0){
+    return html
+  }
+
+  // 找到所有开始标记
+  function findStartArr(html){
+    var starArr = []
+    var find = true
+    var nowIndex = 0
+    while(find){
+      var i = html.indexOf(startTag,nowIndex)
+      if(i<0){
+        find = false
+        break
+      }
+      nowIndex = i + startTag.length
+      starArr.push(i)
+    }
+    return starArr
+  }
+  // 找到所有结束标记
+  function findEndArr(html){
+    var endArr = []
+    var find = true
+    var nowIndex = 0
+    while(find){
+      var i = html.indexOf(endTag,nowIndex)
+      if(i<0){
+        find = false
+        break
+      }
+      nowIndex = i + endTag.length
+      endArr.push(nowIndex)
+      // endArr.push([i,nowIndex])
+    }
+    return endArr
+  }
+  // 过滤重复的开始 与结束index 返回[{start:index,end:index},...]
+  function delRepeatIndex(startArr,endArr){
+    // 双数组去重
+    var result = []
+    var rm = function(arr,val){
+      for(var i=0;i<arr.length;i++){
+        if(arr[i] == val){
+          arr.splice(i,1)
+          break
+        }
+      }
+      return arr
+    }
+    var startArrNew = startArr.slice(0)
+    var endArrNew = endArr.slice(0)
+    startArr.forEach(function(start){
+      endArr.forEach(function(end){
+        if(start == end){
+          rm(startArrNew,start)
+          rm(endArrNew,start)
+        }
+      })
+    })
+    // console.log(startArrNew)
+    // console.log(endArrNew)
+    for(var i=0;i<startArrNew.length;i++){
+      result.push({
+        start:startArrNew[i],
+        end:endArrNew[i],
+        type:'article',
+      })
+    }
+    
+    return result
+  }
+  // 添加不包含article index索引
+  function addOtherIndex(arr){
+    var i=0,res=[],len=arr.length
+    // 判断下 是否设置第一个
+    if(arr[0].start > 0){
+      res.push({
+        start:0,
+        end:arr[0].start
+      })
+    }
+    for(i;i<len;i++){
+      res.push(arr[i])
+      if(i+1<len){
+        res.push({
+          start:arr[i].end,
+          end:arr[i+1].start
+        })
+      }
+    }
+    // // 判断下 是否设置最后一个
+    if(res[res.length-1].end < htmlLength){
+      res.push({
+        start:res[res.length-1].end,
+        end:htmlLength
+      })
+    }
+    return res
+  }
+  // 分割 并组合成新的str html
+  function spliceArrayToHtml(html,arr){
+    var i=0,len=arr.length,res=''
+    for(i;i<len;i++){
+      var start =arr[i].start
+      var end =arr[i].end
+      if(arr[i].type === 'article'){
+        res+='<div class="ql-hidden"><div class="ql-hidden-title"></div><div class="ql-hidden-box">'+html.substring(start,end)+'</div></div>'
+        continue
+      }
+      res+=html.substring(start,end)
+    }
+    return res
+  }
+  var startArr = findStartArr(html)
+  var endArr = findEndArr(html)
+  var substringArry = delRepeatIndex(startArr,endArr)
+  var res = addOtherIndex(substringArry)
+  // console.log(res)
+  // console.log(htmlLength)
+  var str = spliceArrayToHtml(html,res)
+
+  return str
+}
+
+function hiddenToArticle(html){
+  if(typeof html != 'string'){
+    return false
+  }
+  var startTag = '<div class="ql-hidden"><div class="ql-hidden-title"></div><div class="ql-hidden-box">'
+  var endTag = '</div></div>'
+  var htmlLength = html.length
+  if(html.indexOf(startTag)<0){
+    return html
+  }
+  
+  // 找到所有开始标记 与 结束标记
+  function findStartEndArr(html){
+    var starArr = []
+    var find = true
+    var nowIndex = 0
+    while(find){
+      var i = html.indexOf(startTag,nowIndex)
+      if(i<0){
+        find = false
+        break
+      }
+      nowIndex = i + startTag.length
+      var end = html.indexOf(endTag,nowIndex) + endTag.length
+      starArr.push({start:i,end:end,type:'hidden'})
+    }
+    return starArr
+  }
+  // 添加不包含article index索引
+  function addOtherIndex(arr){
+    var i=0,res=[],len=arr.length
+    // 判断下 是否设置第一个
+    if(arr[0].start > 0){
+      res.push({
+        start:0,
+        end:arr[0].start
+      })
+    }
+    for(i;i<len;i++){
+      res.push(arr[i])
+      if(i+1<len){
+        res.push({
+          start:arr[i].end,
+          end:arr[i+1].start
+        })
+      }
+    }
+    // 判断下 是否设置最后一个
+    if(res[res.length-1].end < htmlLength){
+      res.push({
+        start:res[res.length-1].end,
+        end:htmlLength
+      })
+    }
+    return res
+  }
+  // 分割 并组合成新的str html
+  function spliceArrayToHtml(html,arr){
+    var i=0,len=arr.length,res=''
+    for(i;i<len;i++){
+      var start =arr[i].start
+      var end =arr[i].end
+      if(arr[i].type === 'hidden'){
+        res+=html.substring(start+startTag.length,end-endTag.length)
+        continue
+      }
+      res+=html.substring(start,end)
+    }
+    return res
+  }
+  var startEndArr = findStartEndArr(html)
+  var res = addOtherIndex(startEndArr)
+  console.log(res)
+  var str = spliceArrayToHtml(html,res)
+  return str
+}
+// 获取文章内容
+window.getEditorContent=function(){
+  var ele = editor.getElementsByTagName('div')[0];
+  var txt = ele.innerText.replace(/[\n\r]/g,'')
+  var htmls = ele.innerHTML.replace(/[\n\r]/g,'')
+  if(txt.trim()=='' && htmls.indexOf('<iframe')<0 && htmls.indexOf('<img')<0){
+    var obj = {
+      key:'editorcontent',
+      content:'',
+      at:[],
+      images:[],
+      videos:[]
+    }
+    sendMessageToApp(obj)
+    return obj
+  }
+  var html = ele.innerHTML;
+  html = html.replace(/<\/section><section>/g,'')
+  // html = html.replace(/<\/article><article>/g,'')
+  html = articleToHidden(html)
+  // html = html.replace(/<\/blockquote><blockquote>/g,'')
+
+  // img表情转txt
+  html = translateTxtImg(html)
+  // 发送前 替换本地图片 变成 src
+  html = replaceDataPicurlToSrc(html)
+
+
+  res = {
+    content:iframeToTxt(html),
+    at:findAT(html),
+    images:findIMAGE(html),
+    videos:findVIDEO(html),
+  }
+  // console.log(res.images)
+  var obj = {
+    key:'editorcontent',
+    content:res.content,
+    at:res.at,
+    images:res.images,
+    videos:res.videos,
+  }
+  // 去掉多余空白换行
+  obj.content = obj.content.replace(/<p( class="[a-z\-]+")?><br><\/p>/g,'')
+  sendMessageToApp(obj)
+  return res;
+  // sendMessageToApp(res)
+}
+// 设置编辑器内容
+window.setEditorContent=function(content){
+  // 把 \n替换成 </blockquote><blockquote>
+  function blockquoteAddBr(HTML){
+    var div = document.createElement('div');
+    div.innerHTML = HTML
+    var el = div.getElementsByTagName("blockquote")
+    for(var i=0;i<el.length;i++){
+      el[i].innerHTML = el[i].innerHTML.replace(/\n/g,'<\/blockquote><blockquote>')
+    }
+    // HTML = HTML.replace(/<\/blockquote><blockquote>/g,'\n')
+    return div.innerHTML
+  }
+  // var ele = editor.getElementsByTagName('div')[0];
+  // content = hiddenToArticle(content)
+  // ele.innerHTML = txtToIframe(content)
+  quill.clipboard.dangerouslyPasteHTML(blockquoteAddBr(txtToIframe(content)))
+}
+// setEditorContent()
+// 插入后能获得光标
+window.insertFocus=function(txt){
+    range = quill.getSelection(true);
+    quill.insertText(range.index, ' ', {'link':false,'bold':false},Quill.sources.USER)
+    // quill.insertText(range.index, '@'+txt,{link:'@'+id},Quill.sources.USER);
+}
+// 格式化
+window.toggleSelectionBlockType=function(type){
+  if(type === 'hidden'){
+    quill.format(type, !quill.getFormat()[type])
+  }
+  if(type === 'blockquote'){
+    quill.format(type, !quill.getFormat()[type])
+  }
+  if(type === 'list'){
+    quill.format(type, !quill.getFormat()[type])
+  }
+  if(type === 'bold'){
+    quill.format(type, !quill.getFormat()[type])
+  }
+  if(type === 'italic'){
+    quill.format(type, !quill.getFormat()[type])
+  }
+  if(type === 'strike'){
+    quill.format(type, !quill.getFormat()[type])
+  }
+  if(type == 'left' || type == 'right' || type == 'center' || type == 'justify'){
+    if(type == 'left'){
+      quill.format('align', false)
+    }else{
+      quill.format('align', type)
+    }
+  }
+  
+  
+  var obj={
+    key:'stylechange',
+    data:quill.getFormat()
+  }
+  try{
+    webkit.messageHandlers.BFJSObj.postMessage(obj)
+  }catch(e){
+    // console.log(e)
+  }
+}
+// 插入
+window.insertMedias=function(obj){
+  var url = obj.url
+  var txt = obj.txt
+  var id = obj.id
+  var range = quill.getSelection(true);
+  // 插入图片 {type:'IMAGE',url:'图片地址'}
+  if(obj.type === 'IMAGE'){
+    if(typeof url == 'object'){
+      for(var i=0;i<url.length;i++){
+        var range = quill.getSelection(true);
+
+        quill.insertText(range.index, '\n', true);
+        quill.setSelection(range.index + 1);
+        quill.insertEmbed(range.index+1, 'holdimg', url[i]);
+        quill.format('align', 'center')
+        quill.setSelection(range.index + 2);
+        quill.insertText(range.index+2, '\n', true);
+        quill.format('align', false)
+
+        // quill.insertEmbed(range.index, 'holdimg', url[i],Quill.sources.USER);
+        // quill.setSelection(range.index + 1, Quill.sources.USER);
+      }
+      return;
+    }else{
+
+      quill.insertText(range.index, '\n', true);
+      quill.setSelection(range.index + 1);
+      quill.insertEmbed(range.index+1, 'holdimg', url);
+      quill.format('align', 'center')
+      quill.setSelection(range.index + 2);
+      quill.insertText(range.index+2, '\n', true);
+      quill.format('align', false)
+
+      // quill.insertEmbed(range.index, 'holdimg', url,Quill.sources.USER);
+      // quill.setSelection(range.index + 1, Quill.sources.USER);
+    }
+  }
+  // 插入视频 {type:'VIDEO',url:'视频地址','picurl','视频图片地址'}
+  if(obj.type === 'VIDEO'){
+    if(url.substring(0,2) == '//'){
+      url = 'https:'+url
+    }
+    quill.insertEmbed(range.index, 'video', {
+      src:url,
+      'data-picurl':obj.picurl
+    })
+    quill.setSelection(range.index + 1, Quill.sources.USER);
+  }
+  // 插入表情
+  if(obj.type === 'EMOT'){
+    quill.insertEmbed(range.index, 'emoticons', url,Quill.sources.USER);
+    quill.setSelection(range.index + 1)
+  }
+  // 插入颜文字
+  if(obj.type === 'EMOTXT'){
+    quill.insertText(range.index, txt, {'link':false,'bold':false})
+  }
+  // link链接
+  if(obj.type === 'LINK'){
+    range = quill.getSelection(true);
+    quill.insertText(range.index, '#链接地址',{link:url},Quill.sources.USER);
+    // sendMessageToApp({hook:obj.type})
+  }
+  // @链接
+  if(obj.type === 'AT'){
+    range = quill.getSelection(true);
+    quill.insertText(range.index, '@'+txt,{link:'@'+id},Quill.sources.USER);
+  }
+}
+
+function devTool(){
+  var devBox = document.createElement('div');
+  devBox.className = 'devBox'
+  devBox.setAttribute('style','position:fixed;bottom:0;let:0;width:100%;')
+  var format = ['hidden','blockquote','list','bold','italic','strike','getEditorContent','setEditorContent','EMOT']
+  format.forEach(function(key){
+    var button = document.createElement('button')
+    button.innerText = key
+    if(key == 'EMOT'){
+      button.onclick = function(){
+        window.insertMedias({type:'EMOT',url:'http://i0.hdslb.com/bfs/article/d7178e258a0efc969b65ccc2b1322fb235f5dff4.png'})
+      }
+      devBox.appendChild(button)
+      return
+    }
+    if(key == 'getEditorContent'){
+      button.onclick = function(){
+        console.log(window.getEditorContent())
+      }
+      devBox.appendChild(button)
+      return
+    }
+    if(key == 'setEditorContent'){
+      button.onclick = function(){
+        var html = prompt('输入content')
+        if(html){
+          window.setEditorContent(html)
+        }
+      }
+      devBox.appendChild(button)
+      return
+    }
+    button.onclick = function(){
+      window.toggleSelectionBlockType(key)
+    }
+    devBox.appendChild(button)
+  })
+  document.body.appendChild(devBox)
+}
+if(window.location.search == '?dev'){
+  devTool()
+}
+// function insertAfter(newElement, targetElement){
+//   var parent = targetElement.parentNode;
+//   if (parent.lastChild == targetElement) {
+//       parent.appendChild(newElement);
+//   }
+//   else {
+//       parent.insertBefore(newElement, targetElement.nextSibling);
+//   }
+// }
+
+// window.onload = function(){
+  
+//   document.querySelector('#editor').onclick = function(ev){
+   
+//     if(ev.target.tagName === 'IMG'){
+//       var input = document.createElement('input');
+//       insertAfter(input, ev.target);
+//       input.focus();      
+//     }
+//   };
+// }
