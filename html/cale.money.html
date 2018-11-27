@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>calc</title>
+	<style type="text/css">
+		td{border: 1px solid #000}
+	</style>
+</head>
+<body>
+	实付总价格：<input id="count" type="text" name="">
+	<p>每份价格：<button id="add">+</button></p>
+	<ul id="list">
+	</ul>
+	<table id="table"></table>
+	<button id="calc">计算</button>
+	<script>
+		function $calc(total,every=[]){
+			let res = []
+			let count = every.reduce(function(pre,cur){return pre+cur},0)
+			every.forEach(function(num){
+				res.push(total*num/count)
+			})
+			return res
+		}
+		const create=()=>{
+			let ele = document.createElement('li')
+			ele.innerHTML = '<input type="text"> <button>-</button>'
+			let del = ele.getElementsByTagName('button')[0]
+			let input = ele.getElementsByTagName('input')[0]
+			del.onclick = ()=>{
+				list.removeChild(ele)
+			}
+			list.appendChild(ele)
+			input.focus()
+		}
+		add.onclick=()=>{
+			create()
+		}
+		calc.onclick=()=>{
+			let total = parseFloat(count.value)
+			let every = []
+			Array.from(list.getElementsByTagName('input')).forEach((el)=>{
+				if(el.value){
+					every.push(parseFloat(el.value))
+				}
+			})
+			console.log(every)
+			let res = $calc(total,every)
+			console.log(res)
+			
+			table.innerHTML = `
+			<tr>${every.map((val)=>{
+				return `<td>${val}</td>`
+			})}</tr>
+			<tr>${res.map((val)=>{
+				return `<td>${val}</td>`
+			})}</tr>
+			`
+		}
+	</script>
+</body>
+</html>
+
