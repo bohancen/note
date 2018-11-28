@@ -1,6 +1,6 @@
-function findSame(arr){
+function findSame(array){
 	// 找到相同的 大于1就是相同的
-	let findResult = arr.reduce((obj,cur)=>{
+	let findResult = array.reduce((obj,cur)=>{
 		if(obj[cur]){
 			obj[cur]++
 		}else{
@@ -8,10 +8,10 @@ function findSame(arr){
 		}
 		return obj
 	},{})
-	return arr.reduce((pre,cur)=>{
+	return array.reduce((arr,cur)=>{
 		if (findResult[cur]==1) {
-			pre.push(cur)
+			arr.push(cur)
 		}
-		return pre
+		return arr
 	},[])
 }
