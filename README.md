@@ -24,6 +24,18 @@ sudo systemctl stop firewalld.service && sudo systemctl disable firewalld.servic
 "terminal.integrated.shell.windows": "C:\\Windows\\sysnative\\bash.exe"
 [参考地址](https://blog.csdn.net/technofiend/article/details/72771277)
 
+## Linux下查看文件内容的命令
+
+    cat     由第一行开始显示内容，并将所有内容输出
+    tac     从最后一行倒序显示内容，并将所有内容输出
+    more    根据窗口大小，一页一页的现实文件内容
+    less    和more类似，但其优点可以往前翻页，而且进行可以搜索字符
+    head    只显示头几行
+    tail    只显示最后几行
+    nl      类似于cat -n，显示时输出行号
+    tailf   类似于tail -f 
+
+
 ## 设置环境变量的三种方法 ubantu in win10
 ### 1.1 临时设置
 export PATH=/home/yan/share/usr/local/arm/3.4.1/bin:$PATH1
