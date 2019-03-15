@@ -1,0 +1,70 @@
+富文本编辑器
+
+1.在 Object 属性链的调用中，很容易因为某个属性不存在而导致之后出现Cannot read property xxx of undefined的错误。
+一般需要做过于冗长的判断，例如：
+const obj = {
+    attr:{
+    	name:'bilibli'
+    }
+}
+if(obj && obj.attr && obj.attr.name){
+	....
+}
+有哪些优化方案？
+
+
+2.match和exec在全局正则匹配是有什么区别？
+
+
+
+3.实现一个随机播放下一个的函数。
+
+
+4.写 React / Vue 项目时为什么要在组件中写 key，其作用是什么？
+
+
+5.['1', '2', '1'].map(parseInt) 结果？ 提示：parseInt(string, radix) radix进制
+
+主要考： parseInt字符串解析成int 
+提示：parseInt(string, radix) radix进制
+可选。表示要解析的数字的基数。该值介于 2 ~ 36 之间。
+如果省略该参数或其值为 0，则数字将以 10 为基础来解析。如果它以 “0x” 或 “0X” 开头，将以 16 为基数。
+如果该参数小于 2 或者大于 36，则 parseInt() 将返回 NaN。
+
+
+6.使用setTimeout、Promise、Async/Await 实现一个 sleep 方法？
+主要考： 异步函数使用
+例子：
+function sleep(timeout){
+	return new Promise(resolve=>{
+		setTimeout(()=>{
+			resolve()
+		},timeout)
+	})
+}
+
+async function a(){
+	await sleep(1000)
+	alert('aaa')
+}
+
+a()
+
+
+6.csrf如何防范
+
+
+7.接口转发
+
+8.正则解析一段HTML
+
+
+9.如何让localStorage中数据，过期销毁，版本控制
+
+10.在axios上封装一层 ，实现部分api接口缓存到localStorage ，下次再访问时取localStorage中数据，并且保证axios使用方法不变。
+
+
+
+css
+1.css解决滚动条出现造成页面晃动的问题
+
