@@ -1,0 +1,50 @@
+const express = require('express')
+const puppeteer = require('puppeteer-core')
+const Tesseract = require('tesseract.js')
+
+const path = require('path')
+
+const app = express()
+
+app.get('/render',(req,res)=>{
+  let url = req.query.url || ''
+  if(url == ''){
+    res.send('none')
+    return 
+  }
+  
+
+  // const puppeteer = require('puppeteer');
+
+  ;(async () => {
+    // const browser = await puppeteer.launch({executablePath:'./chrome-linux/chrome'});
+    const browser = await puppeteer.launch({executablePath:path.resolve(__dirname,'./chrome-linux/chrome')});
+    const page = await browser.newPage();
+    await page.goto('https://dazhou.58.com/ershoufang/37788812362517x.shtml');
+  
+    // Get the "viewport" of the page, as reported by the page.
+    const clip = await page.evaluate(() => {
+      return {
+        y: $('.strongbox').offset().top,
+        l: $('.strongbox').offset().left,
+        width: $('.strongbox').width,
+        height: $('.strongbox').height,
+      };
+    });
+
+    let myImage = await page.screenshot({path: 'example.png',clip});
+
+    Tesseract.detect(myImage)
+    .then(function(result){
+      console.log(result.text)
+      res.send(result.text)
+    })
+  
+    await browser.close();
+  })();
+
+})
+
+app.listen(1111,()=>{
+  console.log('run 444')
+})
