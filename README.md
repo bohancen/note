@@ -14,7 +14,7 @@ nginx -s reload
 
 ## 防火墙 centos7
 
-sudo systemctl stop firewalld.service && sudo systemctl disable firewalld.service
+    sudo systemctl stop firewalld.service && sudo systemctl disable firewalld.service
 
 - [js-xx](https://github.com/leizongmin/js-xss)
 - [koa](https://github.com/changeyu/Coding-Guide/blob/master/README.md#koa2系列教程)
