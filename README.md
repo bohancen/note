@@ -34,7 +34,14 @@ nginx -s reload
     tail    只显示最后几行
     nl      类似于cat -n，显示时输出行号
     tailf   类似于tail -f 
+    
+## cat 参数
 
+    cat filename | tail -n 100 显示文件最后100行
+    cat filename | head -n 100 显示文件前面100行
+    cat filename | tail -n +100 从100行开始显示，显示100行以后的所有行
+    显示100行到500行
+    cat filename | head -n 500 | tail -n +100
 
 ## 设置环境变量的三种方法 ubantu in win10
 ### 1.1 临时设置
