@@ -48,9 +48,9 @@ nginx -s reload
 export PATH=/home/yan/share/usr/local/arm/3.4.1/bin:$PATH1
 
 ### 1.2 当前用户的全局设置
+whereis bashrc
 打开~/.bashrc，添加行：export PATH=/home/yan/share/usr/local/arm/3.4.1/bin:$PATH1
-使生效：source .bashrc1
-
+使生效：source /etc/bashrc 
 ### 1.3 所有用户的全局设置
 $ vim /etc/profile1
 在里面加入：export PATH=/home/yan/share/usr/local/arm/3.4.1/bin:$PATH1
