@@ -83,25 +83,29 @@ https://www.jianshu.com/p/8f18ecacc4b5
 
 ## v2ray记录
 
+`
+// 安装
 yum -y install wget
 wget https://install.direct/go.sh
 yum install -y zip unzip
 bash go.sh
 
-### 启动
+//启动
 systemctl start v2ray
-### 停止
+//停止
 systemctl stop v2ray
-### 重启
+//重启
 systemctl restart v2ray
-### 开机自启
-systemctl enable v2ray
-
-### 查看已开放端口
-firewall-cmd --zone=public --list-ports
-### 添加开放端口
-firewall-cmd --zone=public --add-port=80/tcp --permanent
-
+//配置
 cat /etc/v2ray/config.json
-
+//客户端
 https://github.com/2dust/v2rayN/releases
+
+//开机自启
+systemctl enable v2ray
+//查看已开放端口
+firewall-cmd --zone=public --list-ports
+//添加开放端口
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+`
+
