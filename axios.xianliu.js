@@ -1,4 +1,3 @@
-
 // 回调函数集合 结构{fnParamsName:[fns]}
 const callBackFunctions = {}
 // 运行回调 并删除
@@ -9,6 +8,8 @@ const runCallBackFunction = function(stringifyParams,data){
   callBackFunctions[stringifyParams] = undefined
 }
 
+// window.callBackFunctions = callBackFunctions
+
 const httpclient = function(config={}){
 
   // 目前只针对get请求
@@ -17,7 +18,8 @@ const httpclient = function(config={}){
 
   // params参数当回调函数key
   let {params={}} = config
-  let stringifyParams = JSON.stringify(params)
+  // 参数排序 并 转成 querystring
+  let stringifyParams = Object.keys(params).sort().reduce((str, key) => str += `&${key}=${params[key]}`, '').replace('&', '')
 
   // 如有一样的请求
   if(callBackFunctions[stringifyParams]){
