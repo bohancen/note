@@ -109,3 +109,7 @@ https://www.jianshu.com/p/8f18ecacc4b5
     firewall-cmd --zone=public --add-port=80/tcp --permanent
     `
 
+## 压缩/解压 node_modules
+
+  tar --exclude=.bin -zcvf node_modules.tar.gz node_modules
+  tar -xf node_modules.tar.gz
